@@ -1,0 +1,13 @@
+ip access-list standard {{ service_name }}-ACL-in
+ permit {{ ip_prefix | ipaddr('network') }} {{ ip_prefix | ipaddr('wildcard') }}
+ 
+interface {{ interface_type }}{{ interface_number }}.{{ subif }}
+ description {{ service_name }}
+ encapsulation dot1Q {{ subif }}
+ ip address {{ ip_prefix | ipaddr(2) | ipaddr('address') }} {{ ip_prefix | ipaddr('netmask') }}
+ ip access-group {{ service_name }}-ACL-in in
+ standby 1 ip {{ ip_prefix | ipaddr(1) | ipaddr('address') }}
+ standby 1 priority 120
+ 
+router ospf 1
+ network {{ ip_prefix | ipaddr('network') }} {{ ip_prefix | ipaddr('wildcard') }} area 1

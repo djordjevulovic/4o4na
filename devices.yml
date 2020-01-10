@@ -1,0 +1,25 @@
+---
+devices:
+  - hostname: dcloud
+    ip: 198.18.1.33
+    username: cisco
+    password: cisco
+    netconf_port: 830
+    cli_port: 22
+    proxy_ip: 198.18.1.30
+    proxy_username: admin
+    proxy_password: admin
+    proxy_port: 8080
+    proxy_hostname: ce2
+  - hostname: devnet_ios_xe
+    ip: 64.103.37.51
+    username: developer
+    password: C1sco12345
+    netconf_port: 10000
+    cli_port: 8181
+    proxy_ip: 198.18.1.30
+    proxy_username: admin
+    proxy_password: admin
+    proxy_port: 8080
+    proxy_hostname: devnet_ios_xe
+

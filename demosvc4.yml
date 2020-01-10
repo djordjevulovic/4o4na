@@ -1,0 +1,7 @@
+---
+parameters:
+  service_name: OPTION4_DEMO
+  device: devnet_ios_xe
+  interface_type: GigabitEthernet
+  interface_number: 2
+  ip_prefix: 192.168.14.0/24

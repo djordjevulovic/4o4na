@@ -1,0 +1,65 @@
+module option4-nso-svc {
+
+  namespace "http://example.com/option4-nso-svc";
+  prefix option4-nso-svc;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  import tailf-ned-cisco-ios {
+    prefix ios;
+  }
+
+  description
+    "NSO Service for 4o4na";
+
+  revision 2020-01-08 {
+    description
+      "Initial revision.";
+  }
+
+  list option4-nso-svc {
+    description "NSO service for option 4";
+
+    key name;
+    leaf name {
+      tailf:info "Unique service id";
+      type string;
+    }
+
+    uses ncs:service-data;
+    ncs:servicepoint option4-nso-svc-servicepoint;
+
+    leaf device {
+      type leafref {
+        path "/ncs:devices/ncs:device/ncs:name";
+      }
+      mandatory true;
+    }
+
+    choice interface {
+
+       mandatory true;
+
+       container GigabitEthernet {
+
+ 	     leaf name {
+            type leafref {
+		       path "/ncs:devices/ncs:device[ncs:name=current()/../../device]/ncs:config/ios:interface/ios:GigabitEthernet/ios:name";
+		    }
+	     }
+       }
+    }
+
+    leaf ip-prefix {
+         type inet:ip-prefix;
+    }
+  }
+}

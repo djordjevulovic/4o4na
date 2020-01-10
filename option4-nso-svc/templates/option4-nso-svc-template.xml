@@ -1,0 +1,63 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{/device}</name>
+      <config>
+        <ip xmlns="urn:ios">
+          <access-list>
+            <standard>
+              <std-named-acl>
+                <name>{/name}-ACL-in</name>
+                <std-access-list-rule>
+                  <rule>permit {$CIDR} {$WILDCARD}</rule>
+                </std-access-list-rule>
+              </std-named-acl>
+            </standard>
+          </access-list>
+        </ip>
+        <interface xmlns="urn:ios">
+          <GigabitEthernet>
+            <name>{$IF-NUM}.{$SUBIF}</name>
+            <description>{/name}</description>
+            <encapsulation>
+              <dot1Q>
+                <vlan-id>{$SUBIF}</vlan-id>
+              </dot1Q>
+            </encapsulation>
+            <ip>
+              <access-group>
+                <direction>in</direction>
+                <access-list>{/name}-ACL-in</access-list>
+              </access-group>
+              <address>
+                <primary>
+                  <address>{$IP2}</address>
+                  <mask>{$MASK}</mask>
+                </primary>
+              </address>
+            </ip>
+            <standby>
+              <standby-list>
+                <group-number>1</group-number>
+                <ip>
+                  <address>{$IP1}</address>
+                </ip>
+                <priority>120</priority>
+              </standby-list>
+            </standby>
+          </GigabitEthernet>
+        </interface>
+        <router xmlns="urn:ios">
+          <ospf>
+            <id>1</id>
+            <network>
+              <ip>{$CIDR}</ip>
+              <mask>{$WILDCARD}</mask>
+              <area>1</area>
+            </network>
+          </ospf>
+        </router>
+      </config>
+    </device> 
+  </devices>
+</config-template>

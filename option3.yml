@@ -1,0 +1,101 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks:
+    - debug: var=device_ip
+      when:
+        debug | bool
+
+    - debug: var=device_port
+      when:
+        debug | bool
+
+    - name: Get IOS facts
+      ios_facts:
+        gather_subset:
+           - interfaces
+        provider:
+            host: "{{ device_ip }}"
+            username: "{{ device_username }}"
+            password: "{{ device_password }}"
+            port: "{{ device_port }}"
+      register: output1
+
+    - name: Create list of all interfaces
+      set_fact:
+         all_interfaces: "{{ output1.ansible_facts.ansible_net_interfaces | list }}"
+
+    - debug: var=all_interfaces
+      when:
+        debug | bool
+
+    - set_fact:
+         subif_match_pattern: "{{ '^{{ interface_type }}{{ interface_number }}\\..*' }}"
+
+    - debug: var=subif_match_pattern
+      when:
+        debug | bool
+
+    - name: Create list of applicable subinterfaces
+      set_fact:
+         subifs: "{{ all_interfaces |  select('match', subif_match_pattern) | list }}"
+
+    - debug: var=subifs
+      when:
+        debug | bool
+
+    - set_fact:
+         subif_replace_pattern: "{{ '^{{ interface_type }}{{ interface_number }}\\.(?P<subif>[0-9]+)' }}"
+
+    - name: Get subifs numbers
+      set_fact:
+         subif_nums: "{{ subifs | map('regex_replace',subif_replace_pattern,'\\g<subif>') | list }}"
+
+    - debug: var=subif_nums
+      when:
+        debug | bool
+
+    - name: Get new subinterface number
+      set_fact:
+         subif: "{{ subif_nums | max | int + 1 }}"
+      when:
+        - subif_nums != []
+
+    - name: Set subinterface number to 1 if it is the first one in the interface
+      set_fact:
+         subif: "1"
+      when:
+        - subif_nums == []
+
+    - debug: var=subif
+      when:
+        debug | bool
+
+    - name: "Service configuration (dry run)"
+      template:
+         src: option3.j2
+         dest: "/tmp/dry-run-{{ service_name }}.cfg"
+      when:
+        dry_run | bool
+
+    - name: Show dry-run configuration
+      debug: var=item
+      with_file:
+        - "/tmp/dry-run-{{ service_name }}.cfg"
+      when:
+        dry_run and debug | bool
+
+    - name: Service confguration (device)
+      ios_config:
+        provider:
+            host: "{{ device_ip }}"
+            username: "{{ device_username }}"
+            password: "{{ device_password }}"
+            port: "{{ device_port }}"
+        src: option3.j2
+      when:
+        not dry_run | bool
+
+
