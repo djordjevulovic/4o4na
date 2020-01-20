@@ -1,5 +1,6 @@
 import requests
 import json
+from collections import OrderedDict
 
 nso_host = None
 nso_username = None
@@ -63,10 +64,10 @@ def nso_put(uri, json_payload, restconf=True):
 
 
 def nso_call_action(action_name, action_input=None, restconf=True):
-    if action_input == None:
+    if action_input is None:
         action_input = {}
 
-    if restconf == True:
+    if restconf is True:
         url = "operations/" + action_name
     else:
         url = "config/" + action_name
@@ -77,6 +78,9 @@ def nso_call_action(action_name, action_input=None, restconf=True):
 
     response = nso_post(url, json_payload, restconf)
 
+    if response is None:
+        return None
+
     if response.status_code == 200:
         return response.json()
     else:
@@ -84,7 +88,7 @@ def nso_call_action(action_name, action_input=None, restconf=True):
 
 
 def nso_device_sync_from(device_name, restconf=True):
-    if restconf == True:
+    if restconf is True:
         url = "devices/device={}/sync-from".format(device_name)
     else:
         url = "devices/device/{}/_operations/sync-from".format(device_name)
@@ -115,8 +119,9 @@ def set_proxy_params(arg_proxy_host, arg_proxy_username, arg_proxy_password, arg
     nso_port = arg_proxy_port
     nso_device = arg_proxy_hostname
 
+
 def create_service(arg_svc_name, arg_if_type, arg_if_num, arg_prefix, arg_dryrun=False):
-    if nso_device == None:
+    if nso_device is None:
         print("ERROR: Cannot map host into NSO device")
         return None
 
@@ -124,16 +129,15 @@ def create_service(arg_svc_name, arg_if_type, arg_if_num, arg_prefix, arg_dryrun
 
     nso_device_sync_from(nso_device, restconf)
 
-    if restconf == True:
+    if restconf is True:
         url = "data/option4-nso-svc={}{}".format(arg_svc_name, "?dryrun" if arg_dryrun is True else "")
     else:
         url = "running/option4-nso-svc/{}{}".format(arg_svc_name, "?dryrun=native" if arg_dryrun is True else "")
 
-    dict = {"option4-nso-svc:option4-nso-svc": [{"name": arg_svc_name,
-                                                 "device": nso_device,
-                                                 "GigabitEthernet": {"name": arg_if_num},
-                                                 "ip-prefix": arg_prefix
-                                                 }]}
+    dict = OrderedDict([("name", arg_svc_name),
+                        ("device", nso_device),
+                        ("GigabitEthernet", {"name": arg_if_num}),
+                        ("ip-prefix", arg_prefix)])
 
     json_payload = json.dumps(dict, sort_keys=False)
 
@@ -147,3 +151,11 @@ def create_service(arg_svc_name, arg_if_type, arg_if_num, arg_prefix, arg_dryrun
     else:
         print("ERROR: service not created, error ({})".format(response.text))
         return None
+
+"""
+    dict = {"option4-nso-svc:option4-nso-svc": [{"name": arg_svc_name,
+                                                 "device": nso_device,
+                                                 "GigabitEthernet": {"name": arg_if_num},
+                                                 "ip-prefix": arg_prefix
+                                                 }]}
+"""

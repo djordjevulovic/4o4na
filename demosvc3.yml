@@ -1,7 +1,7 @@
 ---
 parameters:
-  service_name: OPTION3_DEMO
+  service_name: OPTION3
   device: devnet_ios_xe
   interface_type: GigabitEthernet
-  interface_number: 2
-  ip_prefix: 192.168.13.0/24
+  interface_number: 3
+  ip_prefix: 192.168.3.0/24

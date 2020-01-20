@@ -11,7 +11,7 @@ import logging
 
 def load_yaml(filename):
     with open(filename, 'r') as ymlfile:
-        return yaml.load(ymlfile)
+        return yaml.safe_load(ymlfile)
 
 
 parser = argparse.ArgumentParser()
